@@ -120,9 +120,62 @@ int main()
         }
         
     }
+
+        string type = strame.substr (0,1);                  // "t"
+        string idCAN = strame.substr(1,3);                  //"idCAN : 0B6"
+        string DLC = strame.substr(4,1);                    //DLC : taille de la trame en octets
+        string donnees = strame.substr(5,16);               //donnees
+        string CRC = strame.substr(21,4);        //Check sum ?
+        
+        string Type_CAN = type + idCAN;
+
+        //cout << type << ' ' << endl << idCAN << ' ' << endl << DLC << ' '<< endl << donnees << ' '<< endl << CRC << ' '<< endl;
+        string trame_rep = " " + idCAN + " [ " + DLC + " octets ] : " + donnees + "  " + "compteur";
+        
+        cout << trame_rep << "   " << Type_CAN << endl;
 */
 
+//  do 
+    // {
+    //     //On demande a l'utilisateur
+    //     cout << "Sous quel format souhaitez-vous visionner les trames ?  [SerialPort][Muxtrace]" << endl;
+    //     cin >> methode ;
+    //     cin.get();
 
+
+    //     //On receptionne les trames
+    //     unsigned char trame[50];
+    //     string strame="";
+    //     int n=0,r;
+    //     do
+    //     {   r=port.recevoir(&trame[n]);
+    //         cout<<(int)trame[n]<<" ";
+    //         strame+=trame[n];
+    //     }while(trame[n++]!='\r' &&r>=0);
+
+
+    //     //if POUR AFFICHAGE SERIAL PORT
+    //     if (methode == "SerialPort")
+    //     {
+    //         while (true){
+    //         cout<<endl<<"\t\t"<<strame<<endl;
+    //         usleep(500000);
+    //         }
+    //     }
+    //     //else if POUR AFFICHAGE MUXTRACE
+    //     else if (methode == "Muxtrace")
+    //     {
+    //         while (true){
+    //         cout << "Trame : ";
+    //         FormateTrame(strame);
+
+    //         }
+    //     }
+    //     else (cout << "La bonne commande n'a pas été rentrée, veuillez reessayer");
+
+
+
+    // } while (methode == "SerialPort" || methode == "Muxtrace");
     port.Fermer();
 
                 //DODO INTERDIT !!!!!!!!!!!!!!

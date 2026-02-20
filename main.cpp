@@ -1,10 +1,20 @@
 #include <iostream>
+#include <fstream>
 #include <string>
 #include <unistd.h>
+#include <ctime>
 #include "ClientTCP.h"
 #include "ServeurTCP.h"
 #include "SNPortSerie.h"
-
+using namespace std ;
+const std::string currentDateTime() {
+    time_t now = time(0);
+    struct tm tstruct;
+    char buf[80];
+    tstruct = * localtime( & now);
+    strftime(buf, sizeof(buf), "%Y-%m-%d.%X", & tstruct);
+    return buf;
+}
 //Creation de la methode qui permet de configurer le port COM :
 void EnvoyerConfig(SNPortSerie *portSerie,char *config, int nbOctetsAttendus)
 {   unsigned char reponse[10]; 
@@ -20,6 +30,31 @@ void EnvoyerConfig(SNPortSerie *portSerie,char *config, int nbOctetsAttendus)
     }
     cout<<endl;
 } 
+
+
+//Réception et affichage des trames à partir du format "t0B680000000000007FD07474"
+
+string FormateTrame(string trame){
+    string idCAN = trame.substr(1,3);
+    string DLC = trame.substr(4,1);
+    string donnees = trame.substr(5,trame.length()-9);
+    
+    //cout << idCAN << " [ " << DLC << " octets ] : " << donnees << endl << endl ;
+    return idCAN + " [ " + DLC + " octets ] : " + donnees;
+}
+
+//Réception et affichage des trames à partir du format " idCAN [ n octets ] : 0000000000000000 compteur "
+
+
+string DeFormateTrame(string trame){
+    string idCAN = trame.substr(0,3);
+    string DLC = trame.substr(6,1);
+    string donnees = trame.substr(19,trame.length()-19);
+    
+    //cout << idCAN << DLC << donnees << endl << endl ;
+    return "t" + idCAN + DLC + donnees;
+}
+
 
 int main()
 {   SNPortSerie port;
@@ -37,10 +72,10 @@ int main()
         cout << "Ouverture port : OK" << endl;
     }
     else{
-        cout << "La connexion au port serie a echouee. Veuillez verifier que le port est bien connecte a� la raspberry et non autre part..." << endl;
+        cout << "La connexion au port serie a echouee. Veuillez verifier que le port est bien connecte a� la raspberry et non autre part..." << endl;
     }
      
-////////////////////Envoi de diff�rentes variables pour configurer le port en bon et due forme/////////////////////
+////////////////////Envoi de differentes variables pour configurer le port en bon et due forme/////////////////////
 
     EnvoyerConfig(&port,"CFFFFFF\r",1);
     EnvoyerConfig(&port,"CFFFFFF\r",1);
@@ -48,22 +83,49 @@ int main()
     EnvoyerConfig(&port,"S4\r",1);
     EnvoyerConfig(&port,"Z1\r",1);
     EnvoyerConfig(&port,"O\r",0);
-    while(true)
-     {    unsigned char trame[50];
-          string strame="";
-          int n=0,r;
-          do
-          {	r=port.recevoir(&trame[n]);
-                cout<<(int)trame[n]<<" ";
-                strame+=trame[n];
-          }while(trame[n++]!='\r' &&r>=0);
-          cout<<endl<<"\t\t"<<strame<<endl;
-          usleep(500000);
-     }
-     port.Fermer();
+
+    cout << "Le VSCOM a bien ete configuré !" << endl;
+        
+    //Boucles de demande et sélections
+    string methode;
+    do
+    {
+        cout << "Sous quel format souhaitez-vous visionner les trames ?  [SerialPort][Muxtrace] ";
+        cin >> methode ;
+    }
+    while(methode[0]!='S' && methode[0]!='M');
+
+        while(true)
+        {   
+            unsigned char trame[50];
+            string strame="";
+            int n=0,r;
+            do
+            {   r=port.recevoir(&trame[n]);
+                if(methode[0]=='S') cout<<(int)trame[n]<<" ";
+                if(trame[n]!='\r') strame+=trame[n];
+            }while(trame[n++]!='\r' &&r>=0);
+            string ftrame=FormateTrame(strame);
+            
+            if(methode[0]=='S')
+                cout<<endl<<"\t\t"<<strame<<endl<<endl;
+            else cout<<ftrame<<endl;//<<"\t"<<DeFormateTrame(ftrame)<<endl;
+
+            //Enregistrement fichier log
+            ofstream fichier;
+            fichier.open("Vscom.log",fstream::app);
+            fichier << currentDateTime()<<" : "<<ftrame<<endl;
+            fichier.close();
+            
+            //Petite dodo hebdomadaire
+            usleep(500000);
+    
+        }
+    
+
+    port.Fermer();
      
     //DODO INTERDIT !!!!!!!!!!!!!!
-    
     return 0;
 }
 
