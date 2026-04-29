@@ -18,8 +18,8 @@ Chaque octet, chaque caractère à une signification bien précise :
   0000000000007FD0 	: Donnée
   7474			: CRC
 
-►t ou r correspond au **type** de requete \n
-►l'identifiant définit l’**identificateur** du message \n
-►le DLC correspond à **la longueur** en octets du champs de données (suivant) du message \n
-►donnée comporte les **données utiles**. Taille maximale = 8 octets \n
-►le CRC : Séquence CRC sur 15 bits à Bit délimiteur de CRC qui est toujours récessif \n
+►t ou r correspond au **type** de requete 
+►l'identifiant définit l’**identificateur** du message 
+►le DLC correspond à **la longueur** en octets du champs de données (suivant) du message
+►donnée comporte les **données utiles**. Taille maximale = 8 octets 
+►le CRC : Séquence CRC sur 15 bits à Bit délimiteur de CRC qui est toujours récessif 
